@@ -14,6 +14,15 @@ class CrateCommentsTable extends Migration
     public function up()
     {
         //
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            $table->string("author",200)->nullable(); // there saves the name of creator
+            $table->text("body")->nullable();
+            $table->boolean("visible")->default(1);
+            $table->integer("creator_id")->nullable();
+            $table->integer("project_id")->nullable();
+            $table->timestamps();
+        });
     }
 
     /**

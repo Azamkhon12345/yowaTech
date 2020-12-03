@@ -171,6 +171,36 @@ Route::group(
             return  redirect('/');
         });
 
+        Route::post('/user/profile/edit/{id}',function (Request $request,$id){
+            if(Auth::user()->id == $id){
+                if ($request->hasFile('avatar') && $request->file('avatar')->isValid()) {
+                    $path = $request->image->store('/profiles/user'.$id.'/', ['disk' => 'public_uploads']);
+
+                    DB::table('users')->where("id","=",$id)->update([
+                        "name" =>$request->name,
+                        "avatar"=>$path,
+                        "aboutme"=>$request->aboutme,
+                        "motto"=>$request->motto,
+                        "email"=>$request->email,
+                        "updated_at"=> new \DateTime()
+                    ]);
+                }else{
+                    DB::table('users')->where("id","=",$id)->update([
+                        "name" =>$request->name,
+                        "aboutme"=>$request->aboutme,
+                        "motto"=>$request->motto,
+                        "email"=>$request->email,
+                        "updated_at"=> new \DateTime()
+                    ]);
+                }
+                return redirect('/user/profile/edit/{id}');
+            }
+            $request->session()->flash('warning',"У вас нет прав ");
+            return  redirect('/');
+        });
+        Route::post("/pocket/donate/{id}",function (){
+
+        });
 
     }
 );
