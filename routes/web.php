@@ -217,6 +217,28 @@ Route::group(
                 "news"=>$news,
             ]);
         });
+        //transactions admin
+        Route::get("/admin/transactions",function (){
+            $data = DB::table("transactions")->get();
+            return view("admin.transactions.transactionsMain",[
+                "transactions" =>$data,
+            ]);
+        });
+
+        Route::get("/admin/transactions/{id}",function ($id){
+            $data = DB::table("transactions")->where("id","=",$id)->get();
+            return view("admin.transactions.viewTransaction",[
+                "transaction" =>$data,
+            ]);
+        });
+
+        Route::post("/admin/transactions/{id}",function (Request $request,$id){
+            $validation = $request->validation;
+            DB::table("transactions")->where("id","=",$id)->update([
+                "validation"=>$validation,
+            ]);
+            return redirect("/admin/transactions");
+        });
         //projects admin
 
         Route::get('/admin/projects',function(){
