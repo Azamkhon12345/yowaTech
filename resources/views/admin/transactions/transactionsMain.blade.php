@@ -107,15 +107,16 @@
                                     @foreach($sender as $sender1)
                                         Sender: <a href="{{'/user/profile/'.$sender1->id}}">{{$sender1->name}} </a> ->
                                         @endforeach
-                                    </span>
-                                    <span>
-
                                     @foreach($receiver as $receiver1)
                                         Receiver: <a href="{{'/user/profile/'.$receiver1->id}}">{{$receiver1->name}} </a>
                                         @endforeach
                                     </span>
                                     <span>
                                         Purpose: {{$item->purpose}}
+                                    </span>
+                                    <span>
+                                        Other data:
+                                        @
                                     </span>
                                 </div>
                             </div>

@@ -111,7 +111,7 @@ Route::get('/news/{id}', function ($id) {
 
 // may use $requset for session in further modifications
 Route::get('/projects', function (Request $request) {
-    $products = DB::table('projects')->where('visible','=',1)->paginate(15);
+    $products = DB::table('projects')->where('visible','=',1)->orderBy('id','desc')->paginate(15);
     return view('projects',[
         'projects'=>$products,
     ]);
@@ -211,6 +211,19 @@ Route::group(
                 "receiver_id" =>$id,
                 "price" => $request->cash,
                 "purpose" => 0,
+                "other_data" => ["phone"=>$request->phone,"name"=>$request->name]
+            ]);
+            $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
+            return back();
+        });
+        Route::post("/pocket/pledge/{id}",function (Request $request, $id){
+            $user=Auth::user();
+
+            DB::table('transactions')->insert([
+                "user_id" =>$user->id,
+                "receiver_id" =>$id,
+                "price" => $request->cash,
+                "purpose" => 1,
                 "other_data" => ["phone"=>$request->phone,"name"=>$request->name]
             ]);
             $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
