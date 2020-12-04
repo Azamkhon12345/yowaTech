@@ -30,7 +30,7 @@ class ckeditor extends Controller
                 $user = Auth::user()->id;
             }else $user="unknow";
             //Upload File ['disk' => 'public_uploads']
-            $filenametostore = $request->file('upload')->store('/ckuploads/'.$user.'/', ['disk' => 'public']);
+            $filenametostore = $request->file('upload')->store('/ckuploads/'.$user.'/', ['disk' => 'public_uploads']);
 
             $CKEditorFuncNum = $request->input('CKEditorFuncNum');
             $url = asset('/storage/' . $filenametostore);

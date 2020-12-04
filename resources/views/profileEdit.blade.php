@@ -92,7 +92,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary">Отправить</button>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
                 </div>
                 </form>
             </div>

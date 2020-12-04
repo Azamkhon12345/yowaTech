@@ -49,9 +49,14 @@
 
     <div class="site-header__header-one-wrap clearfix">
         @if(Session::has('warning'))
-        <div class="alert alert-primary" role="alert">
-            {{ Session::get('warning')}}
-        </div>
+            <div class="alert alert-primary" role="alert">
+                {{ Session::get('warning')}}
+            </div>
+        @endif
+        @if(Session::has('message'))
+            <div class="alert alert-success" role="alert">
+                {{ Session::get('warning')}}
+            </div>
         @endif
         <div class="site-header__header-one-wrap-left">
             <a href="index.html" class="main-nav__logo">
