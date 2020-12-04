@@ -79,7 +79,8 @@
                             </ul>
                         </div>
                         <div class="project_details_btn_box">
-                            <a href="/projects/view/{{$item->id}}/help " class="thm-btn back_this_project_btn">Помочь</a>
+                            <button type="button" class="thm-btn back_this_project_btn" data-toggle="modal" data-target="#pocket">Помочь</button>
+
                         </div>
                         <div class="project_detail_share_box">
                             <div class="share_box_title">
@@ -364,5 +365,47 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="pocket" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Пожертвование проекту</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form method="POST" action="/pocket/pledge/{{$item->id}}">
+                    <div class="modal-body">
+                        @csrf
+                        <p>Вы должны сделать оплату по реквизитам ниже и ввести сумму оплаты и своей контакт для получения награждения в поля ниже.</p>
+                        <hr>
+                        <p>Реквизиты для оплаты:</p>
+                        <p>UZCARD: 8600 0000 0000 0000</p>
+
+                        <hr>
+                        <div class="form-group">
+                            <label for="donate-name" class="col-form-label">Фамилия и имя владельца карты:</label>
+                            <input type="text" class="form-control" name="name" id="donate-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="donate-phone" class="col-form-label">Телефон:</label>
+                            <input type="text" class="form-control" name="phone" id="donate-phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="donate-money" class="col-form-label">Сумма:</label>
+                            <input type="text" class="form-control" name="cash" id="donate-money">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
 @endforeach
 @endsection

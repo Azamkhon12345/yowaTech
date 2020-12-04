@@ -116,7 +116,9 @@
                                     </span>
                                     <span>
                                         Other data:
-                                        @
+                                        @foreach($otherdata as $key => $data)
+                                            <br> {{$key}} -> {{$data}}
+                                            @endforeach
                                     </span>
                                 </div>
                             </div>

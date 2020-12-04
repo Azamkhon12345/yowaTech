@@ -150,6 +150,8 @@ Route::group(
         Route::post('create-project',function(Request $request){
             if ($request->hasFile('projectPhoto') && $request->file('projectPhoto')->isValid()) {
                 $image_path = $request->projectPhoto->store('/projectsImg', ['disk' => 'public_uploads']);
+            }else{
+                $image_path =NULL;
             }
             DB::table('projects')->insert([
                 "name"=>$request->projectName,
@@ -164,6 +166,30 @@ Route::group(
                 "created_at"=>new \DateTime(),
 
             ]);
+            $user = Auth::user();
+            $tmp =array();
+            $tmp = json_decode($user->projects,1 );
+            if($tmp != NULL){
+            array_push($tmp, [
+                "projectName"=>$request->projectName,
+                "projectID" => DB::table('projects')->insertGetId(
+                    [ 'name' => $request->projectName ]
+                ),
+            ]);
+            DB::table("users")->where('id','=',$user->id)->update([
+                "projects"=>json_encode($tmp,1),
+            ]);
+            }
+            else{
+                DB::table("users")->where('id','=',$user->id)->update([
+                    "projects"=>json_encode([
+                    "projectName"=>$request->projectName,
+                    "projectID" => DB::table('projects')->insertGetId(
+                        [ 'name' => $request->projectName ]
+                    ),
+                ],1),
+            ]);
+            }
             return redirect('/projects/');
     });
 
@@ -211,7 +237,7 @@ Route::group(
                 "receiver_id" =>$id,
                 "price" => $request->cash,
                 "purpose" => 0,
-                "other_data" => ["phone"=>$request->phone,"name"=>$request->name]
+                "other_data" => json_encode(["phone"=>$request->phone,"name"=>$request->name],1),
             ]);
             $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
             return back();
@@ -224,7 +250,7 @@ Route::group(
                 "receiver_id" =>$id,
                 "price" => $request->cash,
                 "purpose" => 1,
-                "other_data" => ["phone"=>$request->phone,"name"=>$request->name]
+                "other_data" => json_encode(["phone"=>$request->phone,"name"=>$request->name],1),
             ]);
             $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
             return back();
