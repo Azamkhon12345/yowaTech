@@ -43,7 +43,11 @@ Route::get("/promote-to-admin",function (Request $request){
 })->middleware("auth");
 
 Route::get('/', function () {
-    return view('home');
+    $products = DB::table('projects')->where('visible','=',1)->orderBy('id','desc')->take(6)->get();
+    
+    return view('home',[
+            "projects"=>$products,
+        ]);
 });
 Route::get('/contacts', function (Request $request) {
 
@@ -111,29 +115,102 @@ Route::get('/news/{id}', function ($id) {
 
 // may use $requset for session in further modifications
 Route::get('/projects', function (Request $request) {
-    $products = DB::table('projects')->where('visible','=',1)->paginate(15);
+    $products = DB::table('projects')->where('visible','=',1)->orderBy('id','desc')->paginate(15);
+    $category = DB::table('category')->get();
     return view('projects',[
         'projects'=>$products,
+        'categories'=>$category,
     ]);
+
+    
+});
+Route::post('/projects', function(Request $request){
+    if($request->projectCategory == "all"){
+        $products = DB::table("projects")->where('visible','=',1)->orderBy('id','desc')->paginate(15);
+    
+    }else{
+        $products = DB::table("projects")->where('category','like',$request->projectCategory)->where('visible','=',1)->orderBy('id','desc')->paginate(15);
+        
+    }
+    $products = DB::table("projects")->where('category','like',$request->projectCategory)->where('visible','=',1)->orderBy('id','desc')->paginate(15);
+    $category = DB::table('category')->get();
+    return view('projects',[
+        'projects'=>$products,
+        'categories'=>$category,
+    ]);
+    
 });
 Route::get('/projects/view/{id}', function (Request $request,$id) {
     $products = DB::table('projects')
         ->where('visible','=',1)
         ->where('id','=',$id)
         ->get();
+    $update = DB::table('news')
+        ->where("visible",'=',1)
+        ->where("project_id","=",$id)
+        ->get();
+    $rewards = DB::table('rewards')
+        ->where("visible",'=',1)
+        ->where("project_id","=",$id)
+        ->get();
+    $comments = DB::table('comments')
+        ->where("visible",'=',1)
+        ->where("project_id","=",$id)
+        ->orderby('id','desc')
+        ->get();
+    
     return view('projectView',[
         'project'=>$products,
+        'updates' =>$update,
+        "rewards"=>$rewards,
+        "comments"=>$comments,
+    ]);
+});
+Route::get('/projects/view/pledges/{$id}', function (Request $request,$id) {
+    $rewards = DB::table('rewards')
+        ->where('visible','=',1)
+        ->where('id','=',$id)
+        ->get();
+    return view('projectView',[
+        'rewards'=>$rewards,
     ]);
 });
 
 Route::get('/user/profile/{id}',function (Request $request,$id){
     $user_data = DB::table("users")->where('id','=',$id)->get();
     $user_projects = DB::table('projects')->where('creator_id','=',$id)->get();
+    
+    $update = DB::table('news')
+        ->where("visible",'=',1)
+        ->where("creator_id","=",$id)
+        ->get();
     return view('userProfile',[
         "user_data"=>$user_data,
         "user_projects"=>$user_projects,
+        "updates"=>$update,
     ]);
 });
+
+Route::post("/project/add/comment/{id}",function (Request $request, $id){
+    if(Auth::check()){
+        $name = Auth::user()->name;
+        $creator_id = Auth::user()->id;
+    }else{
+        $name = $request->name;
+        $creator_id = NULL;
+    }
+    // make auto registration if you do ont have it via mail and name 
+    // pass send to mail with session token for 2 hours
+    DB::table('comments')->insert([
+        "author" =>$name,
+        "body" =>$request->review,
+        "project_id" => $id,
+        "creator_id" => $creator_id,
+      ]);
+    $request->session()->flash("message"," Коментарий опубликован ! ");
+    return back();
+});
+
 //user profile
 Route::group(
     [
@@ -145,11 +222,17 @@ Route::group(
             if (Auth::check()==false){
                 $request->session()->flash('warning','Пожалуйста зарегестрируйтесь');
             }
-            return view('createProject');
+            $category = DB::table('category')->get();
+            return view('createProject',[
+                    "categories" => $category
+                ]);
         });
         Route::post('create-project',function(Request $request){
+            $user = Auth::user();
             if ($request->hasFile('projectPhoto') && $request->file('projectPhoto')->isValid()) {
                 $image_path = $request->projectPhoto->store('/projectsImg', ['disk' => 'public_uploads']);
+            }else{
+                $image_path ="/assets/img/B.png";
             }
             DB::table('projects')->insert([
                 "name"=>$request->projectName,
@@ -160,12 +243,216 @@ Route::group(
                 "price"=>$request->projectPrice,
                 "deadline"=>$request->projectDeadline,
                 "description"=>$request->projectDescription,
-                "creator_id"=>Auth::user()->id,
+                "creator_id"=>$user->id,
+                "created_at"=>new \DateTime(),
+
+            ]);
+            $project = DB::table("projects")->where("creator_id",'=',$user->id)->get();
+            foreach ($project as $item){
+                if(strcmp($item->name,$request->projectName)==0){
+                    $project_id = $item->id;
+                }
+            }
+            $tmp =array();
+            $tmp = json_decode($user->projects,1 );
+            if($tmp != NULL){
+                array_push($tmp, [
+                    "projectName"=>$request->projectName,
+                    "projectID" => $project_id,
+                ]);
+                DB::table("users")->where('id','=',$user->id)->update([
+                    "projects"=>json_encode($tmp,1),
+                ]);
+            }
+            else{
+                $tmp =[
+                    "projectName"=>$request->projectName,
+                    "projectID" => $project_id,
+                ];
+                DB::table("users")->where('id','=',$user->id)->update([
+                    "projects"=>json_encode($tmp,1),
+                ]);
+            }
+            return redirect('/projects/');
+        });
+
+        Route::get('/project/{id}/edit',function(Request $request,$id){
+            if (Auth::check()==false){
+                $request->session()->flash('warning','Пожалуйста зарегестрируйтесь');
+                return redirect('/');
+            }
+            $project = DB::table('projects')->where('id','=',$id)->get();
+            foreach ($project as $val){
+                if($val->creator_id != Auth::user()->id){
+                    $request->session()->flash('warning','У вас нет прав !');
+                    return redirect('/');
+                }
+            }
+            
+            $rewards = DB::table('rewards')->where('project_id','=',$id)->get();
+            $updates = DB::table('news')->where('project_id','=',$id)->get();
+            $comments = DB::table('comments')->where('project_id','=',$id)->get();
+            $category = DB::table("category")->get();
+            return view('user.editProject',[
+                "project"=>$project,
+                "rewards" =>$rewards,
+                "updates"=>$updates,
+                "comments" =>$comments,
+                "categories" =>$category,
+            ]);
+        });
+        
+        
+        Route::post('/project/{id}/edit',function(Request $request,$id){
+            $user = Auth::user();
+            if ($request->hasFile('projectPhoto') && $request->file('projectPhoto')->isValid()) {
+                $image_path = $request->projectPhoto->store('/projectsImg', ['disk' => 'public_uploads']);
+            
+                DB::table('projects')->where('id','=',$id)->update([
+                    "name"=>$request->projectName,
+                    "main_image"=>$image_path,
+                    "shortcut"=>$request->projectShortcut,
+                    "region"=>$request->projectPlace,
+                    "category"=>$request->projectCategory,
+                    "price"=>$request->projectPrice,
+                    "deadline"=>$request->projectDeadline,
+                    "description"=>$request->projectDescription,
+                    
+                ]);
+            }else{
+               
+                DB::table('projects')->where('id','=',$id)->update([
+                    "name"=>$request->projectName,
+                    "shortcut"=>$request->projectShortcut,
+                    "region"=>$request->projectPlace,
+                    "category"=>$request->projectCategory,
+                    "price"=>$request->projectPrice,
+                    "deadline"=>$request->projectDeadline,
+                    "description"=>$request->projectDescription,
+                ]); 
+                
+            }
+            
+            return redirect('/project/'.$id.'/edit');
+        });
+        
+        Route::get('/project/{id}/create/pledge',function(Request $request,$id){
+            if (Auth::check()==false){
+                $request->session()->flash('warning','Пожалуйста зарегестрируйтесь');
+                return redirect('/');
+            }
+            $project = DB::table('projects')->where('id','=',$id)->get();
+            foreach ($project as $val){
+                if($val->creator_id != Auth::user()->id){
+                    $request->session()->flash('warning','У вас нет прав !');
+                    return redirect('/');
+                }
+            }
+            return view('user.createPledge');
+        });
+        
+        Route::get('/project/{id}/create/update',function(Request $request,$id){
+            if (Auth::check()==false){
+                $request->session()->flash('warning','Пожалуйста зарегестрируйтесь');
+                return redirect('/');
+            }
+            $project = DB::table('projects')->where('id','=',$id)->get();
+            foreach ($project as $val){
+                if($val->creator_id != Auth::user()->id){
+                    $request->session()->flash('warning','У вас нет прав !');
+                    return redirect('/');
+                }
+            }
+            return view('user.createUpdate');
+        });
+        
+        Route::post('/project/{id}/create/update',function(Request $request,$id){
+            $user = Auth::user();
+            $project = DB::table('projects')->where('id','=',$id)->get();
+            foreach ($project as $val ){
+                $id = $val->id;
+            }
+            DB::table('news')->insert([
+                "title"=>$request->title,
+                "body"=>$request->description,
+                "shortcut"=>$request->shortcut,
+                "creator_id"=>$user->id,
+                "project_id"=>$id,
                 "created_at"=>new \DateTime(),
 
             ]);
             return redirect('/projects/');
-    });
+        });
+        
+        Route::post('/pledge/manage/{id}',function(Request $request,$id){
+            if (Auth::check()==false){
+                $request->session()->flash('warning','Пожалуйста зарегестрируйтесь');
+                return redirect('/');
+            }
+            $project = DB::table('rewards')->where('id','=',$id)->get();
+            foreach ($project as $val){
+                if($val->creator_id != Auth::user()->id){
+                    $request->session()->flash('warning','У вас нет прав !');
+                    return redirect('/');
+                }
+            }
+            if(isset($request->visible)){
+                DB::table("rewards")->where('id','=',$id)->update([
+                        "visible"=>$request->visible,
+                    ]);
+            }
+            return back();
+        });
+        Route::post('/comment/manage/{id}',function(Request $request,$id){
+            if (Auth::check()==false){
+                $request->session()->flash('warning','Пожалуйста зарегестрируйтесь');
+                return redirect('/');
+            }
+            $commnets = DB::table('comments')->where('id','=',$id)->get();
+            $projects = json_decode(Auth::user()->projects,1);
+            $flag =0;
+            foreach ($commnets as $val){
+                foreach($projects as $key=> $project){
+                    if($val->project_id == $project){
+                        $flag =1;
+                    }
+                }
+                if($flag==0){
+                    
+                    $request->session()->flash('warning','У вас нет прав !');
+                    return redirect('/');
+                }
+            }
+            if(isset($request->visible)){
+                DB::table("comments")->where('id','=',$id)->update([
+                        "visible"=>$request->visible,
+                    ]);
+            }
+            return back();
+        });
+        Route::post('/project/{id}/create/pledge',function(Request $request,$id){
+            $user = Auth::user();
+            if ($request->hasFile('projectPhoto') && $request->file('projectPhoto')->isValid()) {
+                $image_path = $request->projectPhoto->store('/projectsImg', ['disk' => 'public_uploads']);
+            }else{
+                $image_path ="/assets/img/B.png";
+            }
+            $project = DB::table('projects')->where('id','=',$id)->get();
+            foreach ($project as $val ){
+                $id = $val->id;
+            }
+            DB::table('rewards')->insert([
+                "name"=>$request->pledgeName,
+                "main_image"=>$image_path,
+                "price"=>$request->price,
+                "description"=>$request->description,
+                "creator_id"=>$user->id,
+                "project_id"=>$id,
+                "created_at"=>new \DateTime(),
+
+            ]);
+            return redirect('/projects/');
+        });
 
         Route::get('/user/profile/edit/{id}',function (Request $request,$id){
             if(Auth::user()->id == $id){
@@ -211,7 +498,20 @@ Route::group(
                 "receiver_id" =>$id,
                 "price" => $request->cash,
                 "purpose" => 0,
-                "other_data" => ["phone"=>$request->phone,"name"=>$request->name]
+                "other_data" => json_encode(["phone"=>$request->phone,"name"=>$request->name],1),
+            ]);
+            $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
+            return back();
+        });
+        Route::post("/pocket/pledge/{id}",function (Request $request, $id){
+            $user=Auth::user();
+
+            DB::table('transactions')->insert([
+                "user_id" =>$user->id,
+                "receiver_id" =>$id,
+                "price" => $request->cash,
+                "purpose" => 1,
+                "other_data" => json_encode(["phone"=>$request->phone,"name"=>$request->name],1),
             ]);
             $request->session()->flash("message"," Запрос отправлен ожидайте валидации ! ");
             return back();
@@ -626,7 +926,7 @@ Route::group(
 
     }
 );
-
+Route::get('/logout', '\App\Http\Controllers\Auth\LoginController@logout');
 Auth::routes();
 //
 Route::resource('editor','ckeditor');

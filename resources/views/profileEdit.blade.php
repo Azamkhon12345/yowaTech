@@ -1,14 +1,22 @@
 @extends("layouts.user")
+@section("head")
+    <title>Управление аккаунтом | YoWa</title>
+@endsection
 @section('content')
     @foreach($user_data as $user)
     <div class="container">
         <div class="row">
             <div class="col-xl-4">
-                <a href="/add/product/{{$user->id}}" class="btn btn-prime">Добавить товар</a>
+               
             </div>
             <div class="col-xl-6 d-flex justify-content-between">
                 <div>
-                    <h3>Ваш баланс :</h3>  <span> {{$user->pocket}}</span>
+                    <h3>Ваш баланс :</h3>  
+                         @if($user->pocket==NULL)
+                         <span> У вас пока кошелек пуст :(</span>
+                         @else
+                         <span>{{$user->pocket}}</span>
+                         @endif
                 </div>
                 <div>
                     <button type="button" class="btn btn-primary mx-auto" data-toggle="modal" data-target="#pocket">Пополнить баланс</button>
@@ -31,7 +39,7 @@
                             <td>about me</td>
                             <td>
                                 <textarea name="aboutme"  class="form-control" id="">
-                                     {{$user->aboutme}}
+                                     {{$user->aboutMe}}
                                 </textarea>
                             </td>
                         </tr>

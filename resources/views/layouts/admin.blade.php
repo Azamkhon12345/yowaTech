@@ -14,7 +14,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 
-    <title>Market Dashboard</title>
+    <title>YoWa Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
     <meta name="description" content="Build whatever layout you need with our Architect framework.">
     <meta name="msapplication-tap-highlight" content="no">
@@ -409,9 +409,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="/admin/orders">
+                            <a href="/admin/transactions">
                                 <i class="metismenu-icon pe-7s-pendrive">
-                                </i>Заказы
+                                </i>Транзакции
                             </a>
                         </li>
                         <li>

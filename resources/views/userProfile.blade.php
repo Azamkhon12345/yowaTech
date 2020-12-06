@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-xl-6">
                     <div class="crowdfunding_image wow slideInRight" data-wow-delay="100ms">
-                        <img src="{{asset("assets/images/resources/crowdfunding_img-1.jpg")}}" alt="">
+                        <img src="{{asset("/storage/".$user->avatar)}}" alt="">
                         <div class="crowdfunding_image_shape"></div>
                         <div class="crowdfunding_bottom">
                             <h4>{{substr($user->name, 0, 1)}}</h4>
@@ -64,12 +64,18 @@
                                                                     <h3>{{$user->name}} <span>deadline : {{date('d M',strtotime($project->deadline))}}</span></h3>
                                                                     <p>{{$project->shortcut}}</p>
                                                                 </div>
-                                                                <a href="/projects/view/{{$project->id}}" class="thm-btn comment-one__btn">View</a>
+                                                                <div>
+                                                                    <a href="/projects/view/{{$project->id}}" class="thm-btn  d-block">View</a>
+                                                                    @if(Auth::user()->id == $user->id)
+                                                                    <br>   
+                                                                     <a href="/project/{{$project->id}}/edit" class="thm-btn  d-block">Edit</a>
+                                                                    @endif
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    
                                                 @endforeach
-
+</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -84,58 +90,39 @@
                                 <div class="tab" id="news">
                                     <div class="project_detail_update">
                                         <div class="row">
-{{--                                            <div class="col-xl-12">--}}
-{{--                                                <div class="project_detail_update_single">--}}
-{{--                                                    <h4>#1 Update</h4>--}}
-{{--                                                    <h3>Wow! What an incredible first day!</h3>--}}
-{{--                                                    <div class="person_detail_box">--}}
-{{--                                                        <div class="person_detail_left_box">--}}
-{{--                                                            <div class="person_detail_left_img">--}}
-{{--                                                                <img src="{{asset("assets/images/project/project_detail_person-img-1.png")}}" alt="">--}}
-{{--                                                            </div>--}}
-{{--                                                            <div class="person_detail_left_content">--}}
-{{--                                                                <h5>by <span>Kevin Martin</span></h5>--}}
-{{--                                                                <p>Jan 16, 2020</p>--}}
-{{--                                                            </div>--}}
-{{--                                                        </div>--}}
-{{--                                                        <div class="person_detail_right_box">--}}
-{{--                                                            <a href="#" class="thm-btn creator_btn">Creator</a>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    <p class="project_detail_update_first_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vulputate sed mauris vitae pellentesque. Nunc ut ullamcorper libero. Aenean fringilla mauris quis risus laoreet interdum. Quisque imperdiet orci in metus aliquam egestas. Fusce elit libero, imperdiet nec orci quis, convallis hendrerit nisl. Cras auctor nec purus at placerat.</p>--}}
-{{--                                                    <p class="project_detail_update_last_text">Quisque consectetur, lectus in ullamcorper tempus, dolor arcu suscipit elit, id laoreet tortor justo nec arcu. Nam eu dictum ipsum. Morbi in mi eu urna placerat finibus a vel neque. Nulla in ex at mi viverra sagittis ut non erat. Praesent nec congue elit. Nunc arcu odio, convallis a lacinia ut, tristique id eros. Suspendisse leo erat, pellentesque et commodo vel, varius in felis. Nulla mollis turpis porta justo eleifend volutpat.</p>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-                                        </div>
+                                            <div class="col-xl-12">
+                                                @foreach($updates as $update)
+                                                <div class="col-xl-12">
+                                                    <div class="project_detail_update_single">
+                                                        <h4>#{{$update->id}} Новость</h4>
+                                                        <h3>{{$update->title}}</h3>
+                                                        <div class="person_detail_box">
+                                                            <div class="person_detail_left_box">
+                                                                <div class="person_detail_left_img">
+                                                                    <img src="{{asset("/storage/".$user->avatar)}}" alt="">
+                                                                </div>
+                                                                <div class="person_detail_left_content">
+                                                                    <h5>by <span>{{$user->name}}</span></h5>
+                                                                    <p>{{date('d F y ',strtotime($update->created_at))}}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="person_detail_right_box">
+                                                                <a href="/projects/view/{{$update->project_id}}" class="thm-btn creator_btn"> к проекту</a>
+                                                            </div>
+                                                        </div>
+                                                        <p class="project_detail_update_first_text">{{$update->shortcut}}</p>
+                                                        <p class="project_detail_update_last_text">{!! htmlspecialchars_decode(($update->body)) !!}</p>
+                                                    </div>
+                                                </div>
+                                                @endforeach
+
+                                            </div>
                                     </div>
                                 </div>
 
                                 <div class="tab" id="products">
                                     <div class="project_detail_comment_box">
                                         <div class="row">
-{{--                                            <div class="col-xl-12">--}}
-{{--                                                <div class="project_detail_comment_box_inner">--}}
-{{--                                                    <h3 class="project_detail_comment_title">2 Comments</h3>--}}
-{{--                                                    <div class="project_detail_comment_single">--}}
-{{--                                                        <div class="project_detail_comment_image">--}}
-{{--                                                            <img src="{{asset("assets/images/project/comment-img-1.png")}}" alt="">--}}
-{{--                                                        </div>--}}
-{{--                                                        <div class="project_detail_comment_content">--}}
-{{--                                                            <h3>Kevin Martins<span>26 January, 2020</span></h3>--}}
-{{--                                                            <p>Lorem Ipsum is simply dummy text of the rinting and typesetting been the industry standard dummy text ever sincer condimentum purus. In non ex at ligula fringilla lobortis. Aliquam hendrerit a augue insuscipit. Etiam aliquam massa quis des mauris commodo.</p>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="project_detail_comment_single">--}}
-{{--                                                        <div class="project_detail_comment_image">--}}
-{{--                                                            <img src="{{asset("assets/images/project/comment-img-1.png")}}" alt="">--}}
-{{--                                                        </div>--}}
-{{--                                                        <div class="project_detail_comment_content">--}}
-{{--                                                            <h3>Kevin Martins<span>26 January, 2020</span></h3>--}}
-{{--                                                            <p>Lorem Ipsum is simply dummy text of the rinting and typesetting been the industry standard dummy text ever sincer condimentum purus. In non ex at ligula fringilla lobortis. Aliquam hendrerit a augue insuscipit. Etiam aliquam massa quis des mauris commodo.</p>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
                                         </div>
                                     </div>
                                 </div>

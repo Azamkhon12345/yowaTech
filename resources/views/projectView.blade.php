@@ -1,4 +1,9 @@
 @extends('layouts.user')
+@section('head')
+@foreach($project as $item)
+<title>  {{$item->name}}  | YoWa</title>
+@endforeach
+    @endsection
 @section('classExploreNav')
     current
     @endsection
@@ -10,14 +15,14 @@
             <div class="row">
                 <div class="col-xl-12">
                     <div class="project_details_head">
-                        <h3>Project Hive - Social Network Space in Leicester</h3>
+                        <h3>{{$item->name}}</h3>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xl-7 col-lg-7">
                     <div class="project_details_image">
-                        <img src="{{asset("assets/images/project/project_details_img-1.jpg")}}" alt="">
+                        <img src="{{asset("/storage/".$item->main_image)}}" alt="">
                     </div>
                 </div>
                 <div class="col-xl-5 col-lg-5">
@@ -34,12 +39,16 @@
                                 <div class="inner count-box">
                                     <div class="bar">
                                         <div class="bar-innner">
-                                            <div class="skill-percent">
-                                                <span class="count-text" data-speed="3000" data-stop="86">0</span>
-                                                <span class="percent">%</span>
+                                                <div class="skill-percent">
+                                                    <?php 
+                                                    $temp=0;
+                                                    if ((int)($item->price)==0){ $temp=1;}
+                                                    ?>
+                                                    <span class="count-text" data-speed="3000" data-stop="{{((int)$item->pledged*100)/((int)$item->price+$temp)}}">{{((int)$item->pledged*100)/((int)$item->price+$temp)}}</span>
+                                                    <span class="percent">%</span>
+                                                </div>
+                                                <div class="bar-fill" data-percent="{{((int)$item->pledged *100)/((int)$item->price+$temp)}}" style="width: {{((int)$item->pledged *100)/((int)$item->price+$temp)}}%;"></div>
                                             </div>
-                                            <div class="bar-fill" data-percent="86"></div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -66,24 +75,27 @@
                             <ul class="list-unstyled">
                                 <li>
                                     <h5>${{$item->pledged}}</h5>
-                                    <p>Pledged</p>
+                                    <p>Собрано</p>
                                 </li>
                                 <li>
                                     <h5>${{$item->price}}</h5>
-                                    <p>Goal</p>
+                                    <p>Цель</p>
                                 </li>
                                 <li>
-                                    <h5>{{round(abs(strtotime("now")-strtotime($item->deadline))/ (60 * 60 * 24))}}</h5>
-                                    <p>Days Left</p>
+                                    <h5>{{(int)date('d ',(strtotime($item->deadline)-time()-86400))}} <?php if(((int)date('d ',(strtotime($item->deadline)-time()-86400)))==1){echo "день";} else {echo "дней";} ?></h5>
+                                    <p>Осталось</p>
                                 </li>
                             </ul>
                         </div>
                         <div class="project_details_btn_box">
-                            <a href="/projects/view/{{$item->id}}/help " class="thm-btn back_this_project_btn">Помочь</a>
+                            <button type="button" class="thm-btn back_this_project_btn" data-toggle="modal" data-target="#pocket">Помочь</button>
+                            @if(Auth::check() && Auth::user()->id == $item->creator_id)
+                            <a href="/project/{{$item->id}}/edit" class="thm-btn back_this_project_btn">Изменить</a>
+                            @endif
                         </div>
                         <div class="project_detail_share_box">
                             <div class="share_box_title">
-                                <h2>Share with friends</h2>
+                                <h2>Поделиться</h2>
                             </div>
                             <div class="project_detail__social">
                                 <a href="#" class="tw-clr"><i class="fab fa-twitter"></i></a>
@@ -93,7 +105,7 @@
                             </div>
                         </div>
                         <div class="project_details_text_box">
-                            <p><span>All or nothing</span>. This project will only be funded if it reaches its goal by {{date('d F y',strtotime($item->deadline))}}.</p>
+                            <p><span>Всё или ничего</span>. Этот проект будет профинансирован, если достигнет цели до: {{date("d.m.Y",strtotime($item->deadline))}}.</p>
                         </div>
                     </div>
                 </div>
@@ -107,10 +119,10 @@
                 <div class="col-xl-12">
                     <div class="project-tab-box tabs-box">
                         <ul class="tab-btns tab-buttons clearfix list-unstyled">
-                            <li data-tab="#idea" class="tab-btn active-btn"><span>Project Idea</span></li>
-                            <li data-tab="#faq" class="tab-btn"><span>FAQ</span></li>
-                            <li data-tab="#update" class="tab-btn"><span>Updates</span></li>
-                            <li data-tab="#comm" class="tab-btn"><span>Comments</span></li>
+                            <li data-tab="#idea" class="tab-btn active-btn"><span>Идея Проекта</span></li>
+                            <li data-tab="#faq" class="tab-btn"><span>Подарки</span></li>
+                            <li data-tab="#update" class="tab-btn"><span>Новости</span></li>
+                            <li data-tab="#comm" class="tab-btn"><span>Отзывы</span></li>
                         </ul>
                         <div class="tabs-content">
                             <div class="tab active-tab" id="idea">
@@ -123,18 +135,28 @@
                                         </div>
                                         <div class="col-xl-4 col-lg-4">
                                             <div class="project_details_right_content">
+                                                <?php
+                                                    $user = DB::table('users')->where("id",'=',$item->creator_id)->get();
+                                                ?>
+                                                @foreach($user as $val)
                                                 <div class="project_detail_creator">
                                                     <div class="project_detail_creator_image">
-                                                        <img src="{{asset("assets/images/project/person-img-1.png")}}" alt="">
+                                                        <img src="{{asset("/storage/".$val->avatar)}}" alt="">
                                                     </div>
                                                     <div class="creator_info">
-                                                        <h4>Kevin Martin</h4>
-                                                        <h5>First Created · 0 backed</h5>
+                                                        <a href="">
+                                                            <h4>{{$val->name}}</h4>
+                                                        </a>
+                                                        <h5>{{$val->motto}}</h5>
                                                     </div>
                                                     <div class="project_detail_creator_text">
-                                                        <p>Crochet designer and Creator of the Woolly Chic brand. Loves British wool and is passionate about the environment.</p>
+                                                        <p>
+                                                            {{$val->aboutMe}}
+                                                        </p>
                                                     </div>
                                                 </div>
+                                                @endforeach
+                                                
                                                 <div class="project_detail_pledge">
                                                     <div class="title">
                                                         <h3>Pledge Without<br>A Reward</h3>
@@ -174,50 +196,31 @@
                             <div class="tab" id="faq">
                                 <div class="project_detail_faq">
                                     <div class="row">
-                                        <div class="col-xl-8">
-                                            <div class="faq">
-                                                <div class="accrodion-grp" data-grp-name="faq-one-accrodion">
-                                                    <div class="accrodion active">
-                                                        <div class="accrodion-title">
-                                                            <h4>How donations transferred to the charity?</h4>
-                                                        </div>
-                                                        <div class="accrodion-content">
-                                                            <div class="inner">
-                                                                <p>Suspendisse finibus urna mauris, vitae consequat quam vel. Vestibulum leo ligula, molestie vitae commodo nisl. Nulla facilisi. Pellentesque est metus many of eration in some form.</p>
-                                                            </div><!-- /.inner -->
-                                                        </div>
-                                                    </div>
-                                                    <div class="accrodion ">
-                                                        <div class="accrodion-title">
-                                                            <h4>What information should I share on my project page?</h4>
-                                                        </div>
-                                                        <div class="accrodion-content">
-                                                            <div class="inner">
-                                                                <p>Suspendisse finibus urna mauris, vitae consequat quam vel. Vestibulum leo ligula, molestie vitae commodo nisl. Nulla facilisi. Pellentesque est metus many of eration in some form.</p>
-                                                            </div><!-- /.inner -->
-                                                        </div>
-                                                    </div>
-                                                    <div class="accrodion">
-                                                        <div class="accrodion-title">
-                                                            <h4>What fee do you take for a project?</h4>
-                                                        </div>
-                                                        <div class="accrodion-content">
-                                                            <div class="inner">
-                                                                <p>Suspendisse finibus urna mauris, vitae consequat quam vel. Vestibulum leo ligula, molestie vitae commodo nisl. Nulla facilisi. Pellentesque est metus many of eration in some form.</p>
-                                                            </div><!-- /.inner -->
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                 @foreach($rewards as $reward)
+                                <div class="col-xl-6 col-lg-6">
+                                    <div class="projects_one_single projects_two_single">
+                                        <div class="projects_one_img">
+                                            <img src="{{asset('/storage/'.$reward->main_image)}}" alt="">
+                                            <div class="project_one_icon">
+                                                <i class="fa fa-heart"></i>
                                             </div>
                                         </div>
-                                        <div class="col-xl-4">
-                                            <div class="project_detail_ask_question">
-                                                <p>Don't see the answer to your question? Ask the project creator directly.</p>
-                                                <div class="ask_queston_btn">
-                                                    <a href="#" class="thm-btn">Ask a Question</a>
-                                                </div>
+                                        <div class="projects_one_content">
+                                            <div class="porjects_one_text">
+                                                <p><span>Название:</span> {{$reward->name}}</p>
+                                                <h3><span>Цена:</span> {{$reward->price}}</a></h3>
+                
+                                            </div>
+                                            <div class="projects_categories">
+                                                
                                             </div>
                                         </div>
+                                        <div class="projects_one_bottom">
+                                            {!! htmlspecialchars_decode(($reward->description)) !!}
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -225,50 +228,35 @@
                             <div class="tab" id="update">
                                 <div class="project_detail_update">
                                     <div class="row">
+                                        <?php
+                                            $user = DB::table("users")->where('id','=',$item->creator_id)->get();
+                                        ?>
+                                        @foreach($updates as $update)
                                         <div class="col-xl-12">
                                             <div class="project_detail_update_single">
-                                                <h4>#1 Update</h4>
-                                                <h3>Wow! What an incredible first day!</h3>
+                                                <h4>#{{$update->id}} Новость</h4>
+                                                <h3>{{$update->title}}</h3>
+                                                @foreach($user as $val)
                                                 <div class="person_detail_box">
                                                     <div class="person_detail_left_box">
                                                         <div class="person_detail_left_img">
-                                                            <img src="{{asset("assets/images/project/project_detail_person-img-1.png")}}" alt="">
+                                                            <img src="{{asset("/storage/".$val->avatar)}}" alt="">
                                                         </div>
                                                         <div class="person_detail_left_content">
-                                                            <h5>by <span>Kevin Martin</span></h5>
-                                                            <p>Jan 16, 2020</p>
+                                                            <h5>by <span>{{$val->name}}</span></h5>
+                                                            <p>{{date('d F y ',strtotime($item->created_at))}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="person_detail_right_box">
-                                                        <a href="#" class="thm-btn creator_btn">Creator</a>
+                                                        <a href="/user/profile/{{$val->id}}" class="thm-btn creator_btn">Creator</a>
                                                     </div>
                                                 </div>
-                                                <p class="project_detail_update_first_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vulputate sed mauris vitae pellentesque. Nunc ut ullamcorper libero. Aenean fringilla mauris quis risus laoreet interdum. Quisque imperdiet orci in metus aliquam egestas. Fusce elit libero, imperdiet nec orci quis, convallis hendrerit nisl. Cras auctor nec purus at placerat.</p>
-                                                <p class="project_detail_update_last_text">Quisque consectetur, lectus in ullamcorper tempus, dolor arcu suscipit elit, id laoreet tortor justo nec arcu. Nam eu dictum ipsum. Morbi in mi eu urna placerat finibus a vel neque. Nulla in ex at mi viverra sagittis ut non erat. Praesent nec congue elit. Nunc arcu odio, convallis a lacinia ut, tristique id eros. Suspendisse leo erat, pellentesque et commodo vel, varius in felis. Nulla mollis turpis porta justo eleifend volutpat.</p>
+                                                @endforeach
+                                                <p class="project_detail_update_first_text">{{$update->shortcut}}</p>
+                                                <p class="project_detail_update_last_text">{!! htmlspecialchars_decode(($update->body)) !!}</p>
                                             </div>
                                         </div>
-                                        <div class="col-xl-12">
-                                            <div class="project_detail_update_single update_single_last">
-                                                <h4>#2 Update</h4>
-                                                <h3>Wow! What an incredible first day!</h3>
-                                                <div class="person_detail_box">
-                                                    <div class="person_detail_left_box">
-                                                        <div class="person_detail_left_img">
-                                                            <img src="{{asset("assets/images/project/project_detail_person-img-1.png")}}" alt="">
-                                                        </div>
-                                                        <div class="person_detail_left_content">
-                                                            <h5>by <span>Kevin Martin</span></h5>
-                                                            <p>Jan 16, 2020</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="person_detail_right_box">
-                                                        <a href="#" class="thm-btn creator_btn">Creator</a>
-                                                    </div>
-                                                </div>
-                                                <p class="project_detail_update_first_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vulputate sed mauris vitae pellentesque. Nunc ut ullamcorper libero. Aenean fringilla mauris quis risus laoreet interdum. Quisque imperdiet orci in metus aliquam egestas. Fusce elit libero, imperdiet nec orci quis, convallis hendrerit nisl. Cras auctor nec purus at placerat.</p>
-                                                <p class="project_detail_update_last_text">Quisque consectetur, lectus in ullamcorper tempus, dolor arcu suscipit elit, id laoreet tortor justo nec arcu. Nam eu dictum ipsum. Morbi in mi eu urna placerat finibus a vel neque. Nulla in ex at mi viverra sagittis ut non erat. Praesent nec congue elit. Nunc arcu odio, convallis a lacinia ut, tristique id eros. Suspendisse leo erat, pellentesque et commodo vel, varius in felis. Nulla mollis turpis porta justo eleifend volutpat.</p>
-                                            </div>
-                                        </div>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -278,32 +266,40 @@
                                     <div class="row">
                                         <div class="col-xl-12">
                                             <div class="project_detail_comment_box_inner">
-                                                <h3 class="project_detail_comment_title">2 Comments</h3>
-                                                <div class="project_detail_comment_single">
-                                                    <div class="project_detail_comment_image">
-                                                        <img src="{{asset("assets/images/project/comment-img-1.png")}}" alt="">
+                                                <h3 class="project_detail_comment_title">Comments</h3>
+                                                
+                                                @foreach($comments as $comment)
+                                                    <div class="project_detail_comment_single">
+                                                        <div class="project_detail_comment_image">
+                                                            @if($comment->creator_id==NULL)
+                                                            <img src="{{asset("storage/assets/img/comment.png")}}" alt="">
+                                                            @else
+                                                            <?php 
+                                                                $user = DB::table("users")->where('id','=',$comment->creator_id)->get();
+                                                            ?>
+                                                            @foreach($user as $val)
+                                                            <img src="{{asset("storage/".$val->avatar)}}" alt="">
+                                                            @endforeach
+                                                            @endif
+                                                        </div>
+                                                        <div class="project_detail_comment_content">
+                                                            <h3>{{$comment->author}}<span>{{$comment->created_at}}</span></h3>
+                                                            <p>
+                                                                {{$comment->body}}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div class="project_detail_comment_content">
-                                                        <h3>Kevin Martins<span>26 January, 2020</span></h3>
-                                                        <p>Lorem Ipsum is simply dummy text of the rinting and typesetting been the industry standard dummy text ever sincer condimentum purus. In non ex at ligula fringilla lobortis. Aliquam hendrerit a augue insuscipit. Etiam aliquam massa quis des mauris commodo.</p>
-                                                    </div>
-                                                </div>
-                                                <div class="project_detail_comment_single">
-                                                    <div class="project_detail_comment_image">
-                                                        <img src="{{asset("assets/images/project/comment-img-1.png")}}" alt="">
-                                                    </div>
-                                                    <div class="project_detail_comment_content">
-                                                        <h3>Kevin Martins<span>26 January, 2020</span></h3>
-                                                        <p>Lorem Ipsum is simply dummy text of the rinting and typesetting been the industry standard dummy text ever sincer condimentum purus. In non ex at ligula fringilla lobortis. Aliquam hendrerit a augue insuscipit. Etiam aliquam massa quis des mauris commodo.</p>
-                                                    </div>
-                                                </div>
+                                                @endforeach
+                                                
                                             </div>
                                         </div>
                                         <div class="col-xl-12">
                                             <div class="project_detail_leave_comment__box">
                                                 <h3 class="leave_comment__box_title">Leave a Comment</h3>
-                                                <form class="project_detail_leave_comment__box_form" action="#">
+                                                <form class="project_detail_leave_comment__box_form" method="POST" action="/project/add/comment/{{$item->id}}">
+                                                    @csrf
                                                     <div class="row">
+                                                        @if(!Auth::check())
                                                         <div class="col-md-6">
                                                             <div class="input-box">
                                                                 <input type="text" name="name"
@@ -316,6 +312,14 @@
                                                                        placeholder="Email address" required="">
                                                             </div>
                                                         </div>
+                                                        @else
+                                                        <div class="col-md-6">
+                                                            <div class="input-box">
+                                                                <input type="text" name="name"
+                                                                       value="{{Auth::user()->name}}" >
+                                                            </div>
+                                                        </div>
+                                                        @endif
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-12">
@@ -328,7 +332,7 @@
                                                     <div class="row">
                                                         <div class="col-xl-12">
                                                             <div class="project_detail_leave_comm_btn">
-                                                                <a href="#" class="thm-btn">Submit Comment</a>
+                                                                <input type="submit" class="thm-btn" value="Коментировать">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -364,5 +368,46 @@
         </div>
     </div>
 
+    <div class="modal fade" id="pocket" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Пожертвование проекту</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form method="POST" action="/pocket/pledge/{{$item->id}}">
+                    <div class="modal-body">
+                        @csrf
+                        <p>Вы должны сделать оплату по реквизитам ниже и ввести сумму оплаты и своей контакт для получения награждения в поля ниже.</p>
+                        <hr>
+                        <p>Реквизиты для оплаты:</p>
+                        <p>UZCARD: 8600 0000 0000 0000</p>
+
+                        <hr>
+                        <div class="form-group">
+                            <label for="donate-name" class="col-form-label">Фамилия и имя владельца карты:</label>
+                            <input type="text" class="form-control" name="name" id="donate-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="donate-phone" class="col-form-label">Телефон:</label>
+                            <input type="text" class="form-control" name="phone" id="donate-phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="donate-money" class="col-form-label">Сумма:</label>
+                            <input type="text" class="form-control" name="cash" id="donate-money">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
 @endforeach
 @endsection

@@ -327,7 +327,7 @@ Brand One Carousel
             dots: true,
             smartSpeed: 500,
             autoplay: true,
-            autoplayTimeout: 7000,
+            autoplayTimeout: 70000,
             navText: [
                 '<span class="icon-left-arrow"></span>',
                 '<span class="icon-left-arrow right-arrow"></span>',

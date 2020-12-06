@@ -6,11 +6,9 @@
      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Project || Jitsin || Crowdfunding Form HTML Template</title>
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicons/favicon-16x16.png">
-    <link rel="manifest" href="assets/images/favicons/site.webmanifest">
 
     <!-- Fonts-->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -48,19 +46,10 @@
 
 
     <div class="site-header__header-one-wrap clearfix">
-        @if(Session::has('warning'))
-            <div class="alert alert-primary" role="alert">
-                {{ Session::get('warning')}}
-            </div>
-        @endif
-        @if(Session::has('message'))
-            <div class="alert alert-success" role="alert">
-                {{ Session::get('warning')}}
-            </div>
-        @endif
+        
         <div class="site-header__header-one-wrap-left">
-            <a href="index.html" class="main-nav__logo">
-                <img src="assets/images/resources/logo.png" class="main-logo" alt="Awesome Image">
+            <a href="/" class="main-nav__logo">
+                <img src="{{asset('assets/img/main-logo.png')}}" class="main-logo" alt="YoWa" style="height: 6vh;">
             </a>
         </div>
 
@@ -68,13 +57,13 @@
 
             <div class="main-nav__header-one-top clearfix">
                 <div class="border-bottom"></div>
-                <div class="button"><a href="/create-project">Start a Project</a></div>
+                <div class="button"><a href="/create-project">Создать Проект</a></div>
                 <div class="main-nav__header-one-top-left">
                     @if(\Illuminate\Support\Facades\Auth::check())
                         <ul>
                             <li><a href="/user/profile/{{\Illuminate\Support\Facades\Auth::user()->id}}">Посмотреть профиль</a></li>
                             <li><a href="/user/profile/edit/{{\Illuminate\Support\Facades\Auth::user()->id}}">Редактировать профиль</a></li>
-                            <li><a href="{{ route('logout') }}">Выйти из профиля</a></li>
+                            <li><a href="/logout">Выйти из профиля</a></li>
                         </ul>
                         @else
                         <ul>
@@ -104,19 +93,16 @@
                     <div class="main-nav__main-navigation">
                         <ul class=" main-nav__navigation-box">
                             <li class="dropdown @yield('classHomeNav')">
-                                <a href="/">Home</a>
+                                <a href="/">Главная</a>
                             </li>
                             <li class="dropdown @yield('classExploreNav')">
-                                <a href="/projects">Explore</a>
-                                <ul>
-                                    <li><a href="/projects">Projects</a></li>
-                                </ul><!-- /.sub-menu -->
-                            </li>
-                            <li class="dropdown">
-                                <a href="#">Pages</a>
+                                <a href="/projects">Все Проекты</a>
+                                <!--<ul>
+                                    <li><a href="/projects">Проекты</a></li>
+                                </ul>--><!-- /.sub-menu -->
                             </li>
                             <li class="@yield('classContactsNav')">
-                                <a href="/contacts">Contacts</a>
+                                <a href="/contacts">Контакты</a>
                             </li>
                         </ul>
                     </div><!-- /.navbar-collapse -->
@@ -124,8 +110,8 @@
                     <div class="main-nav__right">
                         <div class="phone-mail-box">
                             <ul>
-                                <li><span class="fas fa-envelope"></span><a href="mailto:azamkhon.kh@gmail.com">azamkhon.kh@gmail.com</a></li>
-                                <li><span class="fa fa-phone"></span><a href="tel:+998903512014">+998 90 3512014</a></li>
+                                <li><span class="fas fa-envelope"></span><a href="mailto:we@yourway.cf">we@yourway.cf</a></li>
+                                <li><span class="fa fa-phone"></span><a href="tel:+998901234567">+998 90 1234567</a></li>
                             </ul>
                         </div>
                     </div>
@@ -134,6 +120,16 @@
             </nav>
         </header>
     </div>
+    @if(Session::has('warning'))
+            <div class="alert alert-primary" role="alert">
+                {{ Session::get('warning')}}
+            </div>
+        @endif
+        @if(Session::has('message'))
+            <div class="alert alert-success" role="alert">
+                {{ Session::get('warning')}}
+            </div>
+        @endif
         @yield('content')
 
 <!--Site Footer Start-->
@@ -143,10 +139,10 @@
                 <div class="col-xl-4 col-lg-6 col-md-6">
                     <div class="footer-widget__column footer-widget__about wow fadeInUp animated" data-wow-delay="100ms" style="visibility: visible; animation-delay: 100ms; animation-name: fadeInUp;">
                         <div class="footer-widget__title">
-                            <h3>About</h3>
+                            <h3>О Нас</h3>
                         </div>
                         <div class="footer-widget_about_text">
-                            <p>Id quas utamur delicata qui, vix ei prima mentitum omnesque. Duo corrumpit cotidieque ne.</p>
+                            <p>Мы команда разработчиков, дизайнеров и генераторов идей, готовые сделать наш мир лучше.</p>
                         </div>
                         <form>
                             <div class="footer_input-box">
@@ -159,60 +155,53 @@
                 <div class="col-xl-2 col-lg-3 col-md-3">
                     <div class="footer-widget__column footer-widget__company wow fadeInUp animated" data-wow-delay="200ms" style="visibility: visible; animation-delay: 200ms; animation-name: fadeInUp;">
                         <div class="footer-widget__title">
-                            <h3>Company</h3>
+                            <h3>Проект</h3>
                         </div>
                         <ul class="footer-widget__company-list list-unstyled">
-                            <li><a href="#">About Us</a></li>
-                            <li><a href="#">How It Works</a></li>
-                            <li><a href="#">Knowledge hub</a></li>
-                            <li><a href="#">Success Stories</a></li>
-                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">О Нас</a></li>
+                            <li><a href="#">Краудфандинг</a></li>
+                            <li><a href="#">Контакты</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-xl-2 col-lg-3 col-md-3">
                     <div class="footer-widget__column footer-widget__explore wow fadeInUp animated" data-wow-delay="300ms" style="visibility: visible; animation-delay: 300ms; animation-name: fadeInUp;">
                         <div class="footer-widget__title">
-                            <h3>Explore</h3>
+                            <h3>Направления</h3>
                         </div>
                         <ul class="footer-widget__explore_list list-unstyled">
-                            <li><a href="#">Blog</a></li>
-                            <li><a href="#">Trust & Safety</a></li>
-                            <li><a href="#">Help & Support</a></li>
-                            <li><a href="#">Press</a></li>
-                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Благотворительность</a></li>
+                            <li><a href="#">Стартапы</a></li>
+                            <li><a href="#">Социальные проекты</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-xl-2 col-lg-4 col-md-4">
                     <div class="footer-widget__column footer-widget__links wow fadeInUp animated" data-wow-delay="400ms" style="visibility: visible; animation-delay: 400ms; animation-name: fadeInUp;">
                         <div class="footer-widget__title">
-                            <h3>Links</h3>
+                            <h3>Полезные ссылки</h3>
                         </div>
                         <ul class="footer-widget_links_list list-unstyled">
-                            <li><a href="#">Privacy</a></li>
-                            <li><a href="#">Cookies</a></li>
-                            <li><a href="#">Funded Companies</a></li>
-                            <li><a href="#">Media Centre</a></li>
-                            <li><a href="#">Partnership</a></li>
+                            <li><a href="#">Правила Пользования</a></li>
+                            <li><a href="#">Сотрудничество</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-xl-2 col-lg-8 col-md-8">
                     <div class="footer-widget__column footer-widget__options wow fadeInUp animated" data-wow-delay="400ms" style="visibility: visible; animation-delay: 400ms; animation-name: fadeInUp;">
                         <div class="footer-widget__title">
-                            <h3>Options</h3>
+                            <h3>Настройки</h3>
                         </div>
                         <div class="footer_Currency">
-                            <select name="currency" id="currency" class="selectpicker">
-                                <option value="Country">$ US Dollars </option>
-                                <option value="Aud">AUD</option>
-                                <option value="Aud">CAD</option>
-                            </select>
+                            <!--<select name="currency" id="currency" class="selectpicker">
+                                <option value="Country">US Dollars (USD) </option>
+                                <option value="Aud">Российские рубли (RUB)</option>
+                                <option value="Aud">Узбекский сум (UZS)</option>
+                            </select>-->
                             <select name="language" id="language" class="selectpicker">
+                                <option value="Canada">Русский</option>
                                 <option value="Country">English</option>
-                                <option value="Canada">Russian</option>
-                                <option value="England">Urdu</option>
+                                <option value="England">O'zbek</option>
                             </select>
                         </div>
                     </div>
@@ -225,10 +214,10 @@
     <div class="site-footer_bottom">
         <div class="container">
             <div class="site-footer_bottom_copyright">
-                <div class="site_footer_bottom_icon">
-                    <img src="assets/images/shapes/footer-bottom-shape.png" alt="">
+                <div class="site_footer_bottom_icon p-0">
+                    <img src="{{asset('assets/img/logo/yowa55.png')}}" alt="">
                 </div>
-                <p>@ All copyright 2020, <a href="#">Layerdrops.com</a></p>
+                <p>@ Все Права Защищены 2020, <a href="#">YoWa</a></p>
             </div>
             <div class="site-footer__social">
                 <a href="#" class="tw-clr"><i class="fab fa-twitter"></i></a>
@@ -266,7 +255,7 @@
         <div class="side-menu__sep"></div><!-- /.side-menu__sep -->
 
         <div class="side-menu__content">
-            <p><a href="mailto:needhelp@tripo.com">needhelp@jitsin.com</a> <br> <a href="tel:888-999-0000">888 999
+            <p><a href="mailto:needhelp@tripo.com">we@yourway.cf</a> <br> <a href="tel:888-999-0000">888 999
                     0000</a></p>
             <div class="side-menu__social">
                 <a href="#"><i class="fab fa-facebook-square"></i></a>

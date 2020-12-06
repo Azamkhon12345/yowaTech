@@ -4172,13 +4172,14 @@ li {
 }
 .projects_one_bottom ul {
   margin: 0;
+  text-align: center;
 }
 .projects_one_bottom ul li {
   display: inline-block;
-  float: left;
+  float: center;
   border-right: 1px solid #eeeae6;
-  padding-right: 30px;
-  margin-right: 30px;
+  padding-right: 1vw;
+  margin-right: 1vw;
 }
 .projects_one_bottom ul li:last-child {
   border-right: none;
@@ -8354,15 +8355,16 @@ li {
   border-top: 1px solid #eeeae6;
   padding-top: 25px;
   margin-bottom: 23px;
+  text-align: center;
 }
 .projects_details_bottom ul {
 }
 .projects_details_bottom ul li {
   display: inline-block;
   border-right: 1px solid #efebe7;
-  padding-right: 60px;
-  margin-right: 67px;
-  margin-left: 40px;
+  padding-right: 40px;
+  margin-right: 5%;
+  margin-left: 5%;
 }
 .projects_details_bottom ul li:nth-child(2) {
   margin-left: 0;
